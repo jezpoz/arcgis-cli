@@ -1,0 +1,4 @@
+
+# Files that the CLI creates when being used
+arcgis-context.json
+arcgis-token.json
