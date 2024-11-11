@@ -6,7 +6,20 @@ export interface IArcGISCLITokenFileContent {
   ssl: boolean;
 }
 
-const tokenFilePath = Deno.cwd() + "/arcgis-token.json";
+export interface IArcGISCLIProfileFileContent {
+  username: string;
+  udn: any;
+  id: string;
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  created: number;
+  modified: number;
+  provider: string;
+}
+
+const tokenFilePath = "./arcgis-token.json";
+const profileFilePath = "./arcgis-profile.json";
 
 export async function readTokenFile(): Promise<IArcGISCLITokenFileContent> {
   await ensureFile(tokenFilePath);
@@ -25,4 +38,23 @@ export async function writeTokenFile(
   );
 
   await Deno.writeFile(tokenFilePath, toFileBuffer);
+}
+
+export async function readProfileFile(): Promise<IArcGISCLIProfileFileContent> {
+  await ensureFile(profileFilePath);
+
+  const decoder = new TextDecoder("utf-8");
+  const buffer = await Deno.readFile(profileFilePath);
+  const fileContent = decoder.decode(buffer);
+  return JSON.parse(fileContent) as IArcGISCLIProfileFileContent;
+}
+
+export async function writeProfileFile(
+  content: IArcGISCLIProfileFileContent,
+): Promise<void> {
+  const toFileBuffer = new TextEncoder().encode(
+    JSON.stringify(content, null, 2),
+  );
+
+  await Deno.writeFile(profileFilePath, toFileBuffer);
 }

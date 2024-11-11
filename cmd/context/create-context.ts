@@ -2,10 +2,11 @@ import { parseArgs } from "@std/cli";
 import {
   readContextFile,
   writeContextFile,
+  IArcGISCLIContextFileContent,
 } from "../../utils/context-utils.ts";
 
 export async function createContext() {
-  let name, portalUrl: string | null = null;
+  let name: string | null = null, portalUrl: string | null = null;
   const args = parseArgs(Deno.args, {
     alias: {
       n: "name",
@@ -47,12 +48,24 @@ export async function createContext() {
     }
   }
 
-  const context = await readContextFile();
+  let context: IArcGISCLIContextFileContent | null;
+  try {
+    context = await readContextFile()
+  } catch (_err) {
+    context = {
+      contexts: [],
+      activeContext: "",
+    }
+  }
 
   context.contexts.push({
-    name,
-    portalUrl,
+    name: name!,
+    portalUrl: portalUrl!,
   });
+
+  if (!context.activeContext) {
+    context.activeContext = name!;
+  }
 
   await writeContextFile(context);
 }

@@ -3,6 +3,8 @@ import { parseArgs } from "@std/cli";
 import { contextCommand } from "./cmd/context/index.ts";
 import { featureLayerCommand } from "./cmd/feature-layer/index.ts";
 import { authCommand } from "./cmd/auth/index.ts";
+import { featureServiceCommand } from "./cmd/feature-service/index.ts";
+import { groupCommand } from "./cmd/group/index.ts";
 
 const args = parseArgs(Deno.args);
 
@@ -21,6 +23,7 @@ switch (resource) {
     break;
   }
   case "group": {
+    groupCommand(command);
     break;
   }
   case "feature-layer": {
@@ -28,6 +31,11 @@ switch (resource) {
     break;
   }
   case "feature-service": {
+    if (args.help && !command) {
+      featureServiceCommand("help");
+    } else {
+      featureServiceCommand(command);
+    }
     break;
   }
   default: {

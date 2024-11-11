@@ -1,6 +1,6 @@
 import { parseArgs, promptSecret } from "@std/cli";
 import { readContextFile } from "../../utils/context-utils.ts";
-import { writeTokenFile } from "../../utils/auth-utils.ts";
+import { writeTokenFile, writeProfileFile } from "../../utils/auth-utils.ts";
 
 type ITokenResponse = ITokenSuccess | ITokenError;
 type ITokenSuccess = {
@@ -16,6 +16,27 @@ type ITokenError = {
   };
 };
 
+type IProfileResponse = IProfileSuccess | IProfileError;
+type IProfileSuccess = {
+  username: string;
+  udn: any;
+  id: string;
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  created: number;
+  modified: number;
+  provider: string;
+};
+type IProfileError = {
+  error: {
+    code: number;
+    messageCode: string;
+    message: string;
+    details: string[];
+  }
+};
+
 export async function login() {
   const context = await readContextFile();
   const activeContext = context.contexts.find((c) =>
@@ -25,7 +46,7 @@ export async function login() {
     console.log("No active context");
     Deno.exit(3);
   }
-  let username: string | null, password: string | null = null;
+  let username: string | null = null, password: string | null = null;
   const args = parseArgs(Deno.args, {
     alias: {
       u: "username",
@@ -93,6 +114,19 @@ export async function login() {
         `${(token as ITokenError).error.message}
       ${(token as ITokenError).error.details.join("\n")}`,
       );
+    }
+
+    const profileEndpoint = new URL(
+      `/portal/sharing/rest/community/users/${username}`,
+      activeContext.portalUrl,
+    );
+    profileEndpoint.searchParams.append("f", "json");
+
+    const profileResponse = await fetch(profileEndpoint);
+    const profileJson = await profileResponse.json() as IProfileResponse;
+    if (!(profileJson as IProfileError).error) {
+      const profile = profileJson as IProfileSuccess;
+      await writeProfileFile({...profile});
     }
   } catch (err) {
     console.error("Lets go", err);

@@ -8,7 +8,7 @@ export interface IArcGISCLIContextFileContent {
   }[];
 }
 
-const contextFilePath = Deno.cwd() + "/arcgis-context.json";
+const contextFilePath = "./arcgis-context.json";
 
 export async function readContextFile(): Promise<IArcGISCLIContextFileContent> {
   await ensureFile(contextFilePath);

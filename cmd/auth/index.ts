@@ -3,7 +3,7 @@ import { login } from "./login.ts";
 export async function authCommand(command: string | number) {
   switch (command) {
     case "login": {
-      login();
+      await login();
       break;
     }
     default: {
